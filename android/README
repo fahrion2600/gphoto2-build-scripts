@@ -6,11 +6,7 @@ Build container image. This has been tested to work using podman, e.g.:
 
 podman build -t gphoto-android-dev .
 
-Run container image, passing in host volume mounts for a build directory and libgphoto2/gphoto2 source directories, e.g.:
-
-WORKSPACE_DIR=/path/to/somewhere
-GPHOTO2_DIR=/path/to/gphoto2
-LIBGPHOTO2_DIR=/path/to/libgphoto2
+Run container image, passing in host volume mounts for workspace directory to hold sources and build artifacts, e.g.:
 
 podman run --interactive --tty --rm \
 	-v /my-workspace:/workspace \
