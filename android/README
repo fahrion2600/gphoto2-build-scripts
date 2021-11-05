@@ -23,13 +23,14 @@ The command will automatically download and build dependencies such as libtool, 
 
 How to use:
 
-After compiling, build artifacts will appear in /workspace/_prefix. You will then need to get them onto your phone. One way is to tar them, copy them onto your phone, and then use adb shell to untar them. However, to actually run the gphoto2 program, you will likely need root. This is because you have to copy them to somewhere in /data in order to get executable permission. It might be possible to package them in an APK along with a Java Android app that extracts them to the app's directory in /data and invokes gphoto2, but I haven't tried that yet.
+After compiling, build artifacts will appear in /workspace/_prefix. You will then need to get them onto your phone. One way is to tar them, copy them onto your phone, and then use adb shell to untar them. At least on my phone, /data/local/tmp doesn't require root to write to. However, to actually run the gphoto2 program, you may need root for USB access. PTP/IP over WiFi should be okay without root if your camera supports it. It might be possible to package everything in an APK along with a Java Android app that extracts them to the app's directory in /data and invokes gphoto2, but I haven't tried that yet, and that doesn't get past the root requirement.
 
 To run gphoto2, you'll have to set the CAMLIBS, IOLIBS, and LD_LIBRARY_PATH environment variables to point to the directories in /data where you have the binaries. For example, if you were in a root adb shell:
 
-export LD_LIBRARY_PATH=/data/tmp/_prefix/lib
-export CAMLIBS=/data/tmp/_prefix/lib/libgphoto2/2.5.26.1/
-export IOLIBS=/data/tmp/_prefix/lib/libgphoto2_port/0.12.0/
+cd /data/local/tmp/_prefix/bin/
+export LD_LIBRARY_PATH=/data/local/tmp/_prefix/lib
+export CAMLIBS=/data/local/tmp/_prefix/lib/libgphoto2/2.5.26.1/
+export IOLIBS=/data/local/tmp/_prefix/lib/libgphoto2_port/0.12.0/
 ./gphoto2 --shell
 
 
