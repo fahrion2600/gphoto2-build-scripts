@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -x
+set -e
+
+# Build libgphoto2
+/scripts/build-libexif
+/scripts/build-libtool
+/scripts/build-libusb
+/scripts/build-libgphoto2
+
+# Build gphoto2
+/scripts/build-libpopt
+/scripts/build-gphoto2
+
+echo "Done! Build artifacts are in /workspace/_prefix"

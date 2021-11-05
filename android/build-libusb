@@ -1,0 +1,9 @@
+#!/bin/bash
+
+REPO_NAME=libusb
+REPO_URL=https://github.com/libusb/libusb
+BINARY_PATH=lib/libusb-1.0.so
+
+export CONFIGURE_ARGS=--disable-udev
+
+/scripts/build-generic $REPO_NAME $REPO_URL $BINARY_PATH

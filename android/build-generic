@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Credits for this script go to laheller
+# https://github.com/gphoto/libgphoto2/issues/335#issuecomment-881946081
+
+set -x
+set -e
+
+if [ ! -f /running-in-container ]; then
+  echo "Don't run this script outside its container! See README for details."
+  exit 1
+fi
+
+REPO_NAME=$1
+REPO_URL=$2
+BINARY_PATH=${3:-lib/$REPO_NAME.so}
+
+if [ ! -d /workspace/${REPO_NAME} ]; then
+    echo "Source tree /workspace/${REPO_NAME} does not exist, checking out ${REPO_URL}..."
+    git clone --recursive ${REPO_URL} ${REPO_NAME}
+fi
+
+cd /workspace/${REPO_NAME}
+
+make distclean || echo "Make distclean failed. This is okay."
+
+# needed for some autoconf projects, might not work for some others
+if [ -f ./bootstrap ]; then
+    ./bootstrap
+else
+    autoreconf -i
+fi
+
+# build will happen in this dir
+rm -rf _build
+mkdir _build
+cd _build
+
+# by default the Android NDK root is at /usr/lib/android-ndk
+export ANDROID_NDK=/usr/lib/android-ndk
+
+# valid values: arm-linux-androideabi-4.9, aarch64-linux-android-4.9, x86-4.9, x86_64-4.9
+export TOOLCHAIN=aarch64-linux-android-4.9
+
+# valid values: arm-linux-androideabi, aarch64-linux-android, i686-linux-android, x86_64-linux-android
+export CROSS_COMPILE=aarch64-linux-android
+
+# valid value: android-XX, where XX is 9-24
+export API=android-24
+
+# valid values: arch-arm, arch-arm64, arch-x86, arch-x86_64
+export ARCH=arch-arm64
+
+export ANDROID_PREFIX=${ANDROID_NDK}/toolchains/${TOOLCHAIN}/prebuilt/linux-x86_64
+export SYSROOT=${ANDROID_NDK}/platforms/${API}/${ARCH}
+export CROSS_PATH=${ANDROID_PREFIX}/bin/${CROSS_COMPILE}
+
+# settings for compiler
+export AR=${CROSS_PATH}-ar
+export AS=${CROSS_PATH}-as
+export CC=${CROSS_PATH}-gcc
+export CPP=${CROSS_PATH}-cpp
+export CXX=${CROSS_PATH}-g++
+export LD=${CROSS_PATH}-ld
+export NM=${CROSS_PATH}-nm
+export OBJDUMP=${CROSS_PATH}-objdump
+export RANLIB=${CROSS_PATH}-ranlib
+export READELF=${CROSS_PATH}-readelf
+export STRIP=${CROSS_PATH}-strip
+
+# set whatever target dir for installation, but do NOT set to /usr
+export PREFIX=/workspace/_prefix
+mkdir -p $PREFIX
+
+# additional settings for compiler
+# we can also specify additional compiler flags
+export CFLAGS="${CFLAGS} --sysroot=${SYSROOT} -I${SYSROOT}/usr/include -I${PREFIX}/include -fPIE -std=c99"
+export CPPFLAGS="${CFLAGS}"
+
+# we can also specify additional linker flags
+export LDFLAGS="${LDFLAGS} --sysroot=${SYSROOT} -L${SYSROOT}/usr/lib -L${PREFIX}/lib -pie"
+
+# Set pkgconfig search path
+export PKG_CONFIG_LIBDIR=${PREFIX}/lib/pkgconfig
+export PKG_CONFIG_PATH=${PREFIX}/lib/pkgconfig
+
+# run "../configure --help" to see all available command line switches, sometimes they must be tweaked
+# here is the main difference when we build a project from sources for Android platform
+../configure --host=${CROSS_COMPILE} --with-sysroot=${SYSROOT} --disable-rpath --prefix=${PREFIX} ${CONFIGURE_ARGS}
+
+make -j6
+
+make install
+
+echo "Architecture of the built library:"
+readelf -a ${PREFIX}/${BINARY_PATH} | grep Machine:

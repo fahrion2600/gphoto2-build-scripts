@@ -1,0 +1,6 @@
+#!/bin/bash
+
+REPO_NAME=libexif
+REPO_URL=https://github.com/libexif/libexif
+
+/scripts/build-generic $REPO_NAME $REPO_URL $LIBRARY_NAME

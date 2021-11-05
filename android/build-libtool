@@ -1,0 +1,7 @@
+#!/bin/bash
+
+REPO_NAME=libtool
+REPO_URL=https://git.savannah.gnu.org/git/libtool.git
+BINARY_PATH=lib/libltdl.so
+
+/scripts/build-generic $REPO_NAME $REPO_URL $BINARY_PATH

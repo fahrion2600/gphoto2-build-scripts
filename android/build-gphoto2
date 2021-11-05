@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Credits for this script go to laheller
+# https://github.com/gphoto/libgphoto2/issues/335#issuecomment-881946081
+
+set -x
+set -e
+
+REPO_NAME=gphoto2
+REPO_URL=https://github.com/gphoto/gphoto2
+BINARY_PATH=bin/gphoto2
+
+/scripts/build-generic $REPO_NAME $REPO_URL $BINARY_PATH

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=gphoto2
+Comment=Utility to control cameras
+Path=/usr/local/bin/gphoto2
+Exec=gphoto2
+Icon=gphoto2
+Terminal=true
+Categories=Graphics
+

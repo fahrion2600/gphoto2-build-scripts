@@ -1,0 +1,60 @@
+Android Build Instructions
+
+Credit goes to laheller from this GitHub comment: https://github.com/gphoto/libgphoto2/issues/335
+
+Build container image. This has been tested to work using podman, e.g.:
+
+podman build -t gphoto-android-dev .
+
+Run container image, passing in host volume mounts for a build directory and libgphoto2/gphoto2 source directories, e.g.:
+
+WORKSPACE_DIR=/path/to/somewhere
+GPHOTO2_DIR=/path/to/gphoto2
+LIBGPHOTO2_DIR=/path/to/libgphoto2
+
+podman run --interactive --tty --rm \
+	-v /my-workspace:/workspace \
+	gphoto-android-dev:latest
+
+The default command will build libgphoto2, gphoto2 and dependencies. There are also other scripts under /script that build individual projects. You can append "/bin/bash" to the end of the podman command to get a shell in the build environment.
+
+The command will automatically download and build dependencies such as libtool, libusb, and libpopt. If source directories for the dependencies already exist in the build directory, they will not be redownloaded. One caveat is currently, the script downloads the default branch of the dependency's git repo. If breaking changes occur in that branch, there may be incompatibilities/build breakages.
+
+
+How to use:
+
+After compiling, build artifacts will appear in /workspace/_prefix. You will then need to get them onto your phone. One way is to tar them, copy them onto your phone, and then use adb shell to untar them. However, to actually run the gphoto2 program, you will likely need root. This is because you have to copy them to somewhere in /data in order to get executable permission. It might be possible to package them in an APK along with a Java Android app that extracts them to the app's directory in /data and invokes gphoto2, but I haven't tried that yet.
+
+To run gphoto2, you'll have to set the CAMLIBS, IOLIBS, and LD_LIBRARY_PATH environment variables to point to the directories in /data where you have the binaries. For example, if you were in a root adb shell:
+
+export LD_LIBRARY_PATH=/data/tmp/_prefix/lib
+export CAMLIBS=/data/tmp/_prefix/lib/libgphoto2/2.5.26.1/
+export IOLIBS=/data/tmp/_prefix/lib/libgphoto2_port/0.12.0/
+./gphoto2 --shell
+
+
+Limitations:
+
+* The Android NDK compiler treats __VA_ARGS__ differently from gcc, causing an off-by-one bug in the ptp2 driver. If you use ptp2, try incorporating this commit: https://github.com/fahrion2600/libgphoto2/commit/914553d71f02515b3c12acdca760aef2c92d0591
+
+* Unless you have a rooted Android phone, you will not be able to connect to cameras via USB due to the Android security model. Changes are required in libgphoto2 to make it work, as well as a Java Android app to handle the USB permissions properly. PTP/IP via WiFi should work, as well as USB using root.
+
+* Currently, not all libgphoto2/gphoto2 dependencies are encapsulated, just the bare minimum.
+
+
+Legal stuff:
+
+Copyright 2021 fahrion.2600
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

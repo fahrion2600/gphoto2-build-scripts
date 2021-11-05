@@ -1,0 +1,40 @@
+AppImage Build Instructions
+
+Build container image. This has been tested to work using podman, e.g.:
+
+podman build -t gphoto-dev .
+
+If you encounter a checksum failure after downloading the linuxdeploy appimage, manually download it from https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage, run sha512sum on it, and manually update the Dockerfile.
+
+Run container image, passing in host volume mounts for the workspace directory (where source code and build artifacts will go), e.g.:
+
+podman run --interactive --tty --rm \
+	-v /my-workspace:/workspace \
+	--name gphoto-build gphoto-dev
+
+The default command builds libgphoto2, gphoto2, and the AppImage. You can append "/bin/bash" to the end of the podman command to get a shell in the build environment.
+
+The first time this is run, libgphoto2 and gphoto2 will be checked out from GitHub. On subsequent runs, if the directories still exist in the workspace directory, they will not be checked out again. The default command will compile libgphoto2, gphoto2, and construct the appimage. The resulting appimage will appear in the top level of the workspace directory.
+
+
+Credits:
+
+gphoto2.png came from https://github.com/gphoto/gphoto2/blob/master/tests/staging/smalllogo.png and was resized to be AppImage-compliant.
+
+
+Legal stuff:
+
+Copyright 2021 fahrion.2600
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.

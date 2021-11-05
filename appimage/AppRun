@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# If not overridden, set CAMLIBS and IOLIBS to locations inside AppImage
+[ -z "$CAMLIBS" ] && export CAMLIBS=${APPDIR}/usr/lib/libgphoto2/camlibs/
+[ -z "$IOLIBS" ] && export IOLIBS=${APPDIR}/usr/lib/libgphoto2_port/iolibs/
+
+# Needed to load libusb
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${APPDIR}/usr/lib/
+
+exec ${APPDIR}/usr/bin/gphoto2 "$@"
+

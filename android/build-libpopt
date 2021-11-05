@@ -1,0 +1,7 @@
+#!/bin/bash
+
+REPO_NAME=libpopt
+REPO_URL=https://github.com/rpm-software-management/popt
+
+/scripts/build-generic $REPO_NAME $REPO_URL $LIBRARY_NAME
+
